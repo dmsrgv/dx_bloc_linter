@@ -11,6 +11,7 @@ class _ExampleLinter extends PluginBase {
   @override
   List<LintRule> getLintRules(CustomLintConfigs configs) => [
         DxBlocLintCode(),
+        AvoidPrint(),
       ];
 }
 
@@ -52,5 +53,26 @@ class DxBlocLintCode extends DartLintRule {
         }
       }
     });
+  }
+}
+
+class AvoidPrint extends DartLintRule {
+  const AvoidPrint()
+      : super(
+          code: const LintCode(
+            name: 'avoid_print',
+            problemMessage: 'Avoid using print statements in production code. TESTIK',
+            correctionMessage: 'Consider using a logger instead. TESTIK',
+            url: 'https://doc.my-lint-rules.com/lints/avoid_print',
+          ),
+        );
+
+  @override
+  void run(
+    CustomLintResolver resolver,
+    ErrorReporter reporter,
+    CustomLintContext context,
+  ) {
+    // Your custom lint rule implementation goes here
   }
 }
