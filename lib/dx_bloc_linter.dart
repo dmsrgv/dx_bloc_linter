@@ -1,28 +1,27 @@
 import 'package:analyzer/dart/ast/ast.dart';
-import 'package:analyzer/dart/element/element.dart';
+import 'package:analyzer/error/error.dart' hide LintCode;
 import 'package:analyzer/error/listener.dart';
 import 'package:custom_lint_builder/custom_lint_builder.dart';
 
-// This is the entrypoint of our custom linter
-PluginBase createPlugin() => _ExampleLinter();
+PluginBase createPlugin() => _DxBlocLinter();
 
-/// A plugin class is used to list all the assists/lints defined by a plugin.
-class _ExampleLinter extends PluginBase {
-  /// We list all the custom warnings/infos/errors
+class _DxBlocLinter extends PluginBase {
   @override
   List<LintRule> getLintRules(CustomLintConfigs configs) => [
-        DxBlocLintCode(),
-        AvoidPrint(),
+        BlocParameterBlocBuilderLintCode(),
+        BlocParameterBlocListenerLintCode(),
+        BlocParameterBlocConsumerLintCode(),
+        BlocProviderLintCode(),
       ];
 }
 
-class DxBlocLintCode extends DartLintRule {
-  const DxBlocLintCode()
+class BlocParameterBlocBuilderLintCode extends DartLintRule {
+  const BlocParameterBlocBuilderLintCode()
       : super(
           code: const LintCode(
-            name: 'dixy_bloc_linter',
+            name: 'bloc_parameter_bloc_builder',
             problemMessage: 'BlocBuilder должен иметь явно указанный параметр bloc.',
-            correctionMessage: 'BlocBuilder должен иметь явно указанный параметр bloc.',
+            errorSeverity: ErrorSeverity.WARNING,
           ),
         );
 
@@ -33,38 +32,30 @@ class DxBlocLintCode extends DartLintRule {
     CustomLintContext context,
   ) {
     context.registry.addInstanceCreationExpression((node) {
-      // Проверяем, что это вызов конструктора BlocBuilder
-      final constructorName = node.constructorName;
-      if (constructorName.name?.name == 'BlocBuilder') {
-        final type = constructorName.type.type;
-        if (type?.element?.name == 'BlocBuilder') {
-          // Проверяем аргументы конструктора
-          final argumentList = node.argumentList;
-          final hasBlocParameter = argumentList.arguments.any((argument) {
-            if (argument is NamedExpression) {
-              return argument.name.label.name == 'bloc';
-            }
-            return false;
-          });
-
-          // Если параметр bloc не указан, сообщаем об ошибке
-          if (!hasBlocParameter) {
-            reporter.atNode(node, code);
+      if (node.constructorName.type.type?.element?.name == 'BlocBuilder') {
+        final argumentList = node.argumentList;
+        final hasBlocParameter = argumentList.arguments.any((argument) {
+          if (argument is NamedExpression) {
+            return argument.name.label.name == 'bloc';
           }
+          return false;
+        });
+
+        if (!hasBlocParameter) {
+          reporter.atNode(node, code);
         }
       }
     });
   }
 }
 
-class AvoidPrint extends DartLintRule {
-  const AvoidPrint()
+class BlocParameterBlocListenerLintCode extends DartLintRule {
+  const BlocParameterBlocListenerLintCode()
       : super(
           code: const LintCode(
-            name: 'avoid_print',
-            problemMessage: 'Avoid using print statements in production code. TESTIK',
-            correctionMessage: 'Consider using a logger instead. TESTIK',
-            url: 'https://doc.my-lint-rules.com/lints/avoid_print',
+            name: 'bloc_parameter_bloc_listener',
+            problemMessage: 'BlocListener должен иметь явно указанный параметр bloc.',
+            errorSeverity: ErrorSeverity.WARNING,
           ),
         );
 
@@ -74,22 +65,78 @@ class AvoidPrint extends DartLintRule {
     ErrorReporter reporter,
     CustomLintContext context,
   ) {
-    // Register a callback for each method invocation in the file.
-    context.registry.addMethodInvocation((MethodInvocation node) {
-      // We get the static element of the method name node.
-      final Element? element = node.methodName.staticElement;
+    context.registry.addInstanceCreationExpression((node) {
+      if (node.constructorName.type.type?.element?.name == 'BlocListener') {
+        final argumentList = node.argumentList;
+        final hasBlocParameter = argumentList.arguments.any((argument) {
+          if (argument is NamedExpression) {
+            return argument.name.label.name == 'bloc';
+          }
+          return false;
+        });
 
-      // Check if the method's element is a FunctionElement.
-      if (element is! FunctionElement) return;
+        if (!hasBlocParameter) {
+          reporter.atNode(node, code);
+        }
+      }
+    });
+  }
+}
 
-      // Check if the method name is 'print'.
-      if (element.name != 'print') return;
+class BlocParameterBlocConsumerLintCode extends DartLintRule {
+  const BlocParameterBlocConsumerLintCode()
+      : super(
+          code: const LintCode(
+            name: 'bloc_parameter_bloc_consumer',
+            problemMessage: 'BlocConsumer должен иметь явно указанный параметр bloc.',
+            errorSeverity: ErrorSeverity.WARNING,
+          ),
+        );
 
-      // Check if the method's library is 'dart:core'.
-      if (!element.library.isDartCore) return;
+  @override
+  void run(
+    CustomLintResolver resolver,
+    ErrorReporter reporter,
+    CustomLintContext context,
+  ) {
+    context.registry.addInstanceCreationExpression((node) {
+      if (node.constructorName.type.type?.element?.name == 'BlocConsumer') {
+        final argumentList = node.argumentList;
+        final hasBlocParameter = argumentList.arguments.any((argument) {
+          if (argument is NamedExpression) {
+            return argument.name.label.name == 'bloc';
+          }
+          return false;
+        });
 
-      // Report the lint error for the method invocation node.
-      reporter.atNode(node, code);
+        if (!hasBlocParameter) {
+          reporter.atNode(node, code);
+        }
+      }
+    });
+  }
+}
+
+class BlocProviderLintCode extends DartLintRule {
+  const BlocProviderLintCode()
+      : super(
+          code: const LintCode(
+            name: 'bloc_provider',
+            problemMessage: 'BlocProvider не должен использоваться.',
+            errorSeverity: ErrorSeverity.WARNING,
+          ),
+        );
+
+  @override
+  void run(
+    CustomLintResolver resolver,
+    ErrorReporter reporter,
+    CustomLintContext context,
+  ) {
+    context.registry.addInstanceCreationExpression((node) {
+      if (node.constructorName.type.type?.element?.name == 'BlocProvider') {
+        reporter.atNode(node, code);
+      }
     });
   }
 }
