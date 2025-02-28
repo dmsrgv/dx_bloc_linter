@@ -17,14 +17,14 @@ class _ExampleLinter extends PluginBase {
 }
 
 class DxBlocLintCode extends DartLintRule {
-  DxBlocLintCode() : super(code: _code);
-
-  /// Metadata about the warning that will show-up in the IDE.
-  /// This is used for `// ignore: code` and enabling/disabling the lint
-  static const _code = LintCode(
-    name: 'dixy_bloc_linter',
-    problemMessage: 'BlocBuilder должен иметь явно указанный параметр bloc.',
-  );
+  const DxBlocLintCode()
+      : super(
+          code: const LintCode(
+            name: 'dixy_bloc_linter',
+            problemMessage: 'BlocBuilder должен иметь явно указанный параметр bloc.',
+            correctionMessage: 'BlocBuilder должен иметь явно указанный параметр bloc.',
+          ),
+        );
 
   @override
   void run(
@@ -49,7 +49,7 @@ class DxBlocLintCode extends DartLintRule {
 
           // Если параметр bloc не указан, сообщаем об ошибке
           if (!hasBlocParameter) {
-            reporter.atNode(node, _code);
+            reporter.atNode(node, code);
           }
         }
       }
