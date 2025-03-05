@@ -1,4 +1,4 @@
-name: dx_bloc_linter
+name: dx_linter
 description: A sample command-line application.
 version: 1.0.0
 # repository: https://github.com/my_org/my_repo
