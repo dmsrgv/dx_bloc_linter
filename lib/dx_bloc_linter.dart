@@ -159,16 +159,16 @@ class BuildHelpersLintCode extends DartLintRule {
     CustomLintContext context,
   ) {
     context.registry.addFunctionDeclaration((node) {
-      if (_isOverride(node) || !_isGlobalFunction(node)) return;
+      if (_isOverride(node) || _isGlobalFunction(node)) return;
 
       _checkReturnType<FunctionDeclaration>(node, reporter);
     });
 
-    // context.registry.addMethodDeclaration((node) {
-    //   if (_isOverride(node)) return;
+    context.registry.addMethodDeclaration((node) {
+      if (_isOverride(node)) return;
 
-    //   _checkReturnType<MethodDeclaration>(node, reporter);
-    // });
+      _checkReturnType<MethodDeclaration>(node, reporter);
+    });
   }
 
   void _checkReturnType<T>(T node, ErrorReporter reporter) {
