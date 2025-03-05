@@ -159,16 +159,16 @@ class BuildHelpersLintCode extends DartLintRule {
     CustomLintContext context,
   ) {
     context.registry.addFunctionDeclaration((node) {
-      if (!_isOverride(node)) {
-        _checkReturnType<FunctionDeclaration>(node, reporter);
-      }
+      if (_isOverride(node) || !_isGlobalFunction(node)) return;
+
+      _checkReturnType<FunctionDeclaration>(node, reporter);
     });
 
-    context.registry.addMethodDeclaration((node) {
-      if (!_isOverride(node)) {
-        _checkReturnType<MethodDeclaration>(node, reporter);
-      }
-    });
+    // context.registry.addMethodDeclaration((node) {
+    //   if (_isOverride(node)) return;
+
+    //   _checkReturnType<MethodDeclaration>(node, reporter);
+    // });
   }
 
   void _checkReturnType<T>(T node, ErrorReporter reporter) {
@@ -189,5 +189,9 @@ class BuildHelpersLintCode extends DartLintRule {
 
   bool _isOverride(AnnotatedNode node) {
     return node.metadata.any((annotation) => annotation.name.name == 'override');
+  }
+
+  bool _isGlobalFunction(FunctionDeclaration node) {
+    return node.parent is! ClassDeclaration && node.parent is! ExtensionDeclaration;
   }
 }

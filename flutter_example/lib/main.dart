@@ -147,4 +147,16 @@ class _MyHomePageState extends State<MyHomePage> {
       children: [],
     );
   }
+
+  Widget _buildColumn() {
+    return const Column(
+      children: [],
+    );
+  }
+}
+
+Widget _buildRow() {
+  return const Row(
+    children: [],
+  );
 }
