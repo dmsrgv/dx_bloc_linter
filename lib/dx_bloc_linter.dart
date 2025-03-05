@@ -12,6 +12,7 @@ class _DxBlocLinter extends PluginBase {
         BlocParameterBlocListenerLintCode(),
         BlocParameterBlocConsumerLintCode(),
         BlocProviderLintCode(),
+        BuildHelpersLintCode(),
       ];
 }
 
@@ -138,5 +139,55 @@ class BlocProviderLintCode extends DartLintRule {
         reporter.atNode(node, code);
       }
     });
+  }
+}
+
+class BuildHelpersLintCode extends DartLintRule {
+  const BuildHelpersLintCode()
+      : super(
+          code: const LintCode(
+            name: 'build_helpers',
+            problemMessage: 'Не должно быть build helpers',
+            errorSeverity: ErrorSeverity.WARNING,
+          ),
+        );
+
+  @override
+  void run(
+    CustomLintResolver resolver,
+    ErrorReporter reporter,
+    CustomLintContext context,
+  ) {
+    context.registry.addFunctionDeclaration((node) {
+      if (!_isOverride(node)) {
+        _checkReturnType<FunctionDeclaration>(node, reporter);
+      }
+    });
+
+    context.registry.addMethodDeclaration((node) {
+      if (!_isOverride(node)) {
+        _checkReturnType<MethodDeclaration>(node, reporter);
+      }
+    });
+  }
+
+  void _checkReturnType<T>(T node, ErrorReporter reporter) {
+    final returnType = switch (node) {
+      FunctionDeclaration() => node.returnType?.type?.getDisplayString(),
+      MethodDeclaration() => node.returnType?.type?.getDisplayString(),
+      _ => null
+    };
+    if (returnType == 'Widget') {
+      switch (node) {
+        case FunctionDeclaration():
+          reporter.atNode(node, code);
+        case MethodDeclaration():
+          reporter.atNode(node, code);
+      }
+    }
+  }
+
+  bool _isOverride(AnnotatedNode node) {
+    return node.metadata.any((annotation) => annotation.name.name == 'override');
   }
 }
